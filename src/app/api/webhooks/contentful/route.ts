@@ -28,6 +28,12 @@ export async function POST(req: NextRequest) {
   if (contentTypeId === "page" && slug) {
     purgeTag(cacheTags.contentPage(slug));
     logger.info({ slug }, "contentful.webhook.page-invalidated");
+  } else if (contentTypeId === "header") {
+    purgeTag(cacheTags.header());
+    logger.info({ contentTypeId }, "contentful.webhook.header-invalidated");
+  } else if (contentTypeId === "footer") {
+    purgeTag(cacheTags.footer());
+    logger.info({ contentTypeId }, "contentful.webhook.footer-invalidated");
   } else {
     purgeTag(cacheTags.contentAll());
     logger.info({ contentTypeId }, "contentful.webhook.bulk-invalidated");
