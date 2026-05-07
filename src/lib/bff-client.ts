@@ -1,5 +1,7 @@
 import type { PageContent } from "@/contracts/content";
 import type { BffErrorBody } from "@/contracts/error";
+import type { Footer } from "@/contracts/footer";
+import type { Header } from "@/contracts/header";
 import type {
   Product,
   ProductSearchParams,
@@ -61,6 +63,8 @@ export const bff = {
     bffFetch<Product>(`/products/${encodeURIComponent(code)}`),
   getPage: (slug: string) =>
     bffFetch<PageContent>(`/content/${encodeURIComponent(slug)}`),
+  getHeader: () => bffFetch<Header>("/header"),
+  getFooter: () => bffFetch<Footer>("/footer"),
 } as const;
 
 export { BffClientError };
