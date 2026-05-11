@@ -33,7 +33,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       <div className="flex flex-col gap-1">
         <h3 className="line-clamp-2 text-sm font-medium">{product.name}</h3>
         {product.price && (
-          <p className="text-sm text-zinc-700 dark:text-zinc-300">
+          <p className="text-sm font-semibold text-black">
             {product.price.formatted ??
               `${product.price.amount.toFixed(2)} ${product.price.currency}`}
           </p>

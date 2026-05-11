@@ -13,7 +13,8 @@ import type {
 
 function absoluteImageUrl(url: string | undefined): string | undefined {
   if (!url) return undefined;
-  if (/^https?:\/\//i.test(url)) return url;
+  const embedded = url.match(/https?:\/\/.+$/i);
+  if (embedded) return embedded[0];
   const base = getEnv().SAP_COMMERCE_BASE_URL.replace(/\/occ\/v\d+\/?$/, "");
   return `${base.replace(/\/+$/, "")}${url.startsWith("/") ? url : `/${url}`}`;
 }
