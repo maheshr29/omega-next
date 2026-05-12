@@ -8,12 +8,18 @@ import { ShopByIndustry } from "@/features/home/components/ShopByIndustry";
 export default function Home() {
   return (
     <>
-      <HomeHero />
+      <Suspense fallback={null}>
+        <HomeHero />
+      </Suspense>
       <Suspense fallback={<FeaturedProductsFallback />}>
         <FeaturedProducts />
       </Suspense>
-      <HelpSection />
-      <ShopByIndustry />
+      <Suspense fallback={null}>
+        <HelpSection />
+      </Suspense>
+      <Suspense fallback={null}>
+        <ShopByIndustry />
+      </Suspense>
     </>
   );
 }

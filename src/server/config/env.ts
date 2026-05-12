@@ -18,6 +18,18 @@ const envSchema = z.object({
     .string()
     .min(1)
     .default("3eST4tydgikBcCV0iCWmo"),
+  CONTENTFUL_HERO_BANNER_ENTRY_ID: z
+    .string()
+    .min(1)
+    .default("4O4rvOry7Hz1AbceWaagZE"),
+  CONTENTFUL_HELP_SECTION_ENTRY_ID: z
+    .string()
+    .min(1)
+    .default("7vV361Mnb543FSepENtTKj"),
+  CONTENTFUL_INDUSTRY_SECTION_ENTRY_ID: z
+    .string()
+    .min(1)
+    .default("32scu7Yc2lF4YqnxQhDVmW"),
 
   SAP_COMMERCE_BASE_URL: z.string().url(),
   SAP_COMMERCE_BASE_SITE_ID: z.string().min(1),

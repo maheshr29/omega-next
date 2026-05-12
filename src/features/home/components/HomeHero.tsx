@@ -1,67 +1,84 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { HeroBanner } from "@/contracts/heroBanner";
+import { getHeroBanner } from "@/server/domains/heroBanner/heroBanner.service";
+import { logger } from "@/server/observability/logger";
 
-const HERO_DATA = {
-  partner: {
-    name: "Burns Engineering",
-    headline:
-      "DwyerOmega welcomes Burns Engineering, a leading provider of temperature measurement solutions.",
-    readMoreHref: "/news/burns-engineering",
-    logo: {
-      src: "/images/hero/burns-logo.png",
-      alt: "Burns Engineering",
-      width: 160,
-      height: 40,
-    },
+const FALLBACK_BANNER: HeroBanner = {
+  headline:
+    "DwyerOmega welcomes Burns Engineering, a leading provider of temperature measurement solutions.",
+  partnerLogo: {
+    url: "/images/hero/burns-logo.png",
+    alt: "Burns Engineering",
+    width: 160,
+    height: 40,
   },
   productImage: {
-    src: "/images/hero/burns-product.png",
+    url: "/images/hero/burns-product.png",
     alt: "Burns Engineering temperature sensor",
   },
+  readMore: { label: "Read more", href: "/news/burns-engineering" },
 };
 
-export function HomeHero() {
+export async function HomeHero() {
+  let banner: HeroBanner;
+  try {
+    banner = await getHeroBanner();
+  } catch (err) {
+    logger.error({ err }, "heroBanner.fetch-failed");
+    banner = FALLBACK_BANNER;
+  }
+
   return (
     <section className="bg-zinc-100">
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-6 py-10 lg:grid-cols-[1fr_minmax(320px,1.2fr)_360px] lg:gap-10">
-        <PartnerAnnouncement />
-        <ProductShowcase />
+        <PartnerAnnouncement banner={banner} />
+        <ProductShowcase banner={banner} />
         <QuickOrderPanel />
       </div>
     </section>
   );
 }
 
-function PartnerAnnouncement() {
+function PartnerAnnouncement({ banner }: { banner: HeroBanner }) {
+  const logo = banner.partnerLogo;
   return (
     <div>
-      <Image
-        src={HERO_DATA.partner.logo.src}
-        alt={HERO_DATA.partner.logo.alt}
-        width={HERO_DATA.partner.logo.width}
-        height={HERO_DATA.partner.logo.height}
-        style={{ height: 36, width: "auto" }}
-        priority
-      />
+      {logo?.url ? (
+        <Image
+          src={logo.url}
+          alt={logo.alt ?? ""}
+          width={logo.width ?? 160}
+          height={logo.height ?? 40}
+          style={{ height: 36, width: "auto" }}
+          priority
+        />
+      ) : null}
       <p className="mt-4 max-w-md text-3xl font-bold leading-tight text-[#1F2D63]">
-        {HERO_DATA.partner.headline}
+        {banner.headline}
       </p>
-      <Link
-        href={HERO_DATA.partner.readMoreHref}
-        className="mt-6 inline-block text-sm font-semibold text-[#1F2D63] underline underline-offset-4 hover:text-[#16224d]"
-      >
-        Read more
-      </Link>
+      {banner.readMore && (
+        <Link
+          href={banner.readMore.href}
+          className="mt-6 inline-block text-sm font-semibold text-[#1F2D63] underline underline-offset-4 hover:text-[#16224d]"
+        >
+          {banner.readMore.label}
+        </Link>
+      )}
     </div>
   );
 }
 
-function ProductShowcase() {
+function ProductShowcase({ banner }: { banner: HeroBanner }) {
+  const image = banner.productImage;
+  if (!image?.url) {
+    return <div className="relative h-56 w-full lg:h-72" aria-hidden="true" />;
+  }
   return (
     <div className="relative h-56 w-full overflow-hidden lg:h-72">
       <Image
-        src={HERO_DATA.productImage.src}
-        alt={HERO_DATA.productImage.alt}
+        src={image.url}
+        alt={image.alt ?? ""}
         fill
         priority
         sizes="(min-width: 1024px) 40vw, 100vw"

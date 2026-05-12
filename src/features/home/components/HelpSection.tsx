@@ -1,113 +1,184 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ComponentType } from "react";
+import type { HelpCard, HelpSection as HelpSectionData } from "@/contracts/helpSection";
+import { getHelpSection } from "@/server/domains/helpSection/helpSection.service";
+import { logger } from "@/server/observability/logger";
 
-type SmallHelpCard = {
-  eyebrow: string;
-  title: string;
-  href: string;
-  Icon: ComponentType;
+const DEFAULT_HREFS = [
+  "/contact-us",
+  "/resources",
+  "https://info.dwyeromega.com/communications-signup",
+  "/about-us",
+] as const;
+
+const FALLBACK_HELP_SECTION: HelpSectionData = {
+  title: "Help is here however you need it.",
+  cards: [
+    {
+      eyebrow: "CONTACT US",
+      heading: "Contact our specialists any time using our help center form.",
+      image: {
+        url: "/images/help/contact-us.png",
+        alt: "DwyerOmega specialist ready to help",
+      },
+      href: DEFAULT_HREFS[0],
+    },
+    {
+      eyebrow: "RESOURCES",
+      heading: "Search our Resources center to view our application stories.",
+      href: DEFAULT_HREFS[1],
+    },
+    {
+      eyebrow: "NEWSLETTER SIGN UP",
+      heading: "Subscribe For our latest News and offers.",
+      href: DEFAULT_HREFS[2],
+    },
+    {
+      eyebrow: "DWYEROMEGA",
+      description:
+        "Our story so far. Find out who we are and why we are the number one provider of Measurement Equipment & Services.",
+      image: {
+        url: "/images/help/story.png",
+        alt: "DwyerOmega measurement equipment",
+      },
+      href: DEFAULT_HREFS[3],
+    },
+  ],
 };
 
-const CONTACT_CARD = {
-  eyebrow: "CONTACT US",
-  title: "Contact our specialists any time using our help center form.",
-  href: "/contact-us",
-};
+function splitTitle(title: string): { bold: string; rest: string } {
+  const idx = title.indexOf(" ");
+  if (idx === -1) return { bold: title, rest: "" };
+  const firstTwoEnd = title.indexOf(" ", idx + 1);
+  if (firstTwoEnd === -1) return { bold: title, rest: "" };
+  return {
+    bold: title.slice(0, firstTwoEnd),
+    rest: title.slice(firstTwoEnd + 1),
+  };
+}
 
-const RESOURCES_CARD: SmallHelpCard = {
-  eyebrow: "RESOURCES",
-  title: "Search our Resources center to view our application stories.",
-  href: "/resources",
-  Icon: ResourcesIllustration,
-};
+function hrefFor(card: HelpCard, index: number): string {
+  return card.href ?? DEFAULT_HREFS[index] ?? "#";
+}
 
-const NEWSLETTER_CARD: SmallHelpCard = {
-  eyebrow: "NEWSLETTER SIGN UP",
-  title: "Subscribe For our latest News and offers.",
-  href: "https://info.dwyeromega.com/communications-signup",
-  Icon: NewsletterIllustration,
-};
+export async function HelpSection() {
+  let data: HelpSectionData;
+  try {
+    data = await getHelpSection();
+    if (data.cards.length === 0) data = FALLBACK_HELP_SECTION;
+  } catch (err) {
+    logger.error({ err }, "helpSection.fetch-failed");
+    data = FALLBACK_HELP_SECTION;
+  }
 
-const STORY_CARD = {
-  eyebrow: "DWYEROMEGA",
-  title:
-    "Our story so far. Find out who we are and why we are the number one provider of Measurement Equipment & Services.",
-  href: "/about-us",
-  imageSrc: "/images/help/story.png",
-  imageAlt: "DwyerOmega measurement equipment",
-};
+  const { bold, rest } = splitTitle(data.title);
+  const [contactCard, ...restCards] = data.cards;
+  const smallCards = restCards.slice(0, 2);
+  const storyCard = restCards[2];
 
-const PERSON_IMAGE = {
-  src: "/images/help/contact-us.png",
-  alt: "DwyerOmega specialist ready to help",
-};
-
-export function HelpSection() {
   return (
     <section className="bg-zinc-100 py-14">
       <div className="mx-auto max-w-7xl px-6">
         <h2 className="mb-8 text-2xl">
-          <span className="font-bold text-zinc-900">Help is here</span>{" "}
-          <span className="text-zinc-500">however you need it.</span>
+          <span className="font-bold text-zinc-900">{bold}</span>
+          {rest ? <span className="text-zinc-500"> {rest}</span> : null}
         </h2>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:grid-rows-[auto_auto]">
-          <div className="md:row-span-2">
-            <ContactCard card={CONTACT_CARD} />
-          </div>
-          <SmallCard card={RESOURCES_CARD} />
-          <SmallCard card={NEWSLETTER_CARD} />
-          <div className="md:col-span-2">
-            <StoryCard />
-          </div>
+          {contactCard ? (
+            <div className="md:row-span-2">
+              <ContactCard card={contactCard} href={hrefFor(contactCard, 0)} />
+            </div>
+          ) : null}
+          {smallCards.map((card, i) => (
+            <SmallCard
+              key={card.eyebrow ?? card.heading ?? i}
+              card={card}
+              href={hrefFor(card, i + 1)}
+              Icon={DEFAULT_ICONS[i] ?? null}
+            />
+          ))}
+          {storyCard ? (
+            <div className="md:col-span-2">
+              <StoryCard card={storyCard} href={hrefFor(storyCard, 3)} />
+            </div>
+          ) : null}
         </div>
       </div>
     </section>
   );
 }
 
-function ContactCard({ card }: { card: typeof CONTACT_CARD }) {
+function ContactCard({ card, href }: { card: HelpCard; href: string }) {
   return (
     <Link
-      href={card.href}
+      href={href}
       className="group flex h-full flex-col overflow-hidden rounded-sm bg-white shadow-sm transition-shadow hover:shadow-md"
     >
       <div className="flex flex-col gap-3 p-5">
-        <p className="text-xs font-semibold tracking-widest text-zinc-500">
-          {card.eyebrow}
-        </p>
-        <p className="text-base font-bold leading-snug text-zinc-900">
-          {card.title}
-        </p>
+        {card.eyebrow ? (
+          <p className="text-xs font-semibold tracking-widest text-zinc-500">
+            {card.eyebrow}
+          </p>
+        ) : null}
+        {card.heading ? (
+          <p className="text-base font-bold leading-snug text-zinc-900">
+            {card.heading}
+          </p>
+        ) : null}
       </div>
-      <div className="relative mt-auto h-64 w-full">
-        <Image
-          src={PERSON_IMAGE.src}
-          alt={PERSON_IMAGE.alt}
-          fill
-          sizes="(min-width: 768px) 33vw, 100vw"
-          className="object-contain object-bottom"
-        />
-      </div>
+      {card.image?.url ? (
+        <div className="relative mt-auto h-64 w-full">
+          <Image
+            src={card.image.url}
+            alt={card.image.alt ?? ""}
+            fill
+            sizes="(min-width: 768px) 33vw, 100vw"
+            className="object-contain object-bottom"
+          />
+        </div>
+      ) : null}
     </Link>
   );
 }
 
-function SmallCard({ card }: { card: SmallHelpCard }) {
-  const isExternal = /^https?:\/\//i.test(card.href);
+function SmallCard({
+  card,
+  href,
+  Icon,
+}: {
+  card: HelpCard;
+  href: string;
+  Icon: ComponentType | null;
+}) {
+  const isExternal = /^https?:\/\//i.test(href);
   const inner = (
     <article className="group flex h-full items-center gap-5 rounded-sm bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex h-16 w-16 shrink-0 items-center justify-center">
-        <card.Icon />
+        {card.icon?.url ? (
+          <Image
+            src={card.icon.url}
+            alt={card.icon.alt ?? ""}
+            width={card.icon.width ?? 64}
+            height={card.icon.height ?? 64}
+            className="h-14 w-14 object-contain"
+          />
+        ) : Icon ? (
+          <Icon />
+        ) : null}
       </div>
       <div className="flex flex-1 flex-col gap-2">
-        <p className="text-xs font-semibold tracking-widest text-zinc-500">
-          {card.eyebrow}
-        </p>
-        <p className="text-base font-bold leading-snug text-zinc-900">
-          {card.title}
-        </p>
+        {card.eyebrow ? (
+          <p className="text-xs font-semibold tracking-widest text-zinc-500">
+            {card.eyebrow}
+          </p>
+        ) : null}
+        {card.heading ? (
+          <p className="text-base font-bold leading-snug text-zinc-900">
+            {card.heading}
+          </p>
+        ) : null}
       </div>
     </article>
   );
@@ -115,7 +186,7 @@ function SmallCard({ card }: { card: SmallHelpCard }) {
   if (isExternal) {
     return (
       <a
-        href={card.href}
+        href={href}
         target="_blank"
         rel="noopener noreferrer"
         className="block h-full"
@@ -125,37 +196,61 @@ function SmallCard({ card }: { card: SmallHelpCard }) {
     );
   }
   return (
-    <Link href={card.href} className="block h-full">
+    <Link href={href} className="block h-full">
       {inner}
     </Link>
   );
 }
 
-function StoryCard() {
+function StoryCard({ card, href }: { card: HelpCard; href: string }) {
+  const eyebrow = card.eyebrow ?? "DWYEROMEGA";
   return (
     <Link
-      href={STORY_CARD.href}
+      href={href}
       className="group grid h-full grid-cols-1 overflow-hidden rounded-sm bg-white shadow-sm transition-shadow hover:shadow-md md:grid-cols-[1.4fr_1fr]"
     >
       <div className="flex flex-col gap-3 p-6">
         <div className="inline-flex items-center gap-2 text-[#1F2D63]">
-          <DwyerOmegaMark />
-          <span className="text-base font-bold tracking-wide">DWYEROMEGA</span>
+          {card.icon?.url ? (
+            <Image
+              src={card.icon.url}
+              alt={card.icon.alt ?? ""}
+              width={card.icon.width ?? 24}
+              height={card.icon.height ?? 24}
+              className="h-6 w-auto"
+            />
+          ) : (
+            <DwyerOmegaMark />
+          )}
+          <span className="text-base font-bold tracking-wide">{eyebrow}</span>
         </div>
-        <p className="text-base leading-snug text-zinc-900">{STORY_CARD.title}</p>
+        {card.description ? (
+          <p className="text-base leading-snug text-zinc-900">
+            {card.description}
+          </p>
+        ) : card.heading ? (
+          <p className="text-base leading-snug text-zinc-900">{card.heading}</p>
+        ) : null}
       </div>
-      <div className="relative hidden h-full min-h-32 md:block">
-        <Image
-          src={STORY_CARD.imageSrc}
-          alt={STORY_CARD.imageAlt}
-          fill
-          sizes="(min-width: 768px) 25vw, 50vw"
-          className="object-cover"
-        />
-      </div>
+      {card.image?.url ? (
+        <div className="relative hidden h-full min-h-32 md:block">
+          <Image
+            src={card.image.url}
+            alt={card.image.alt ?? ""}
+            fill
+            sizes="(min-width: 768px) 25vw, 50vw"
+            className="object-cover"
+          />
+        </div>
+      ) : null}
     </Link>
   );
 }
+
+const DEFAULT_ICONS: (ComponentType | null)[] = [
+  ResourcesIllustration,
+  NewsletterIllustration,
+];
 
 function DwyerOmegaMark() {
   return (
