@@ -31,11 +31,17 @@ const envSchema = z.object({
     .min(1)
     .default("32scu7Yc2lF4YqnxQhDVmW"),
 
-  SAP_COMMERCE_BASE_URL: z.string().url(),
-  SAP_COMMERCE_BASE_SITE_ID: z.string().min(1),
-  SAP_COMMERCE_TOKEN_URL: z.string().url(),
-  SAP_COMMERCE_CLIENT_ID: z.string().min(1),
-  SAP_COMMERCE_CLIENT_SECRET: z.string().min(1),
+  SAP_COMMERCE_BASE_URL: z
+    .string()
+    .url()
+    .default("https://dev1-api-hybris.omega.com/oews/v2"),
+  SAP_COMMERCE_BASE_SITE_ID: z.string().min(1).default("omegaengineeringus"),
+  SAP_COMMERCE_TOKEN_URL: z
+    .string()
+    .url()
+    .default("https://dev1-api-hybris.omega.com/authorizationserver/oauth/token"),
+  SAP_COMMERCE_CLIENT_ID: z.string().min(1).default("dwyeromegacpiId"),
+  SAP_COMMERCE_CLIENT_SECRET: z.string().min(1).default("dwyeromegacpiId1"),
 
   BFF_PRODUCT_REVALIDATE_SECONDS: z
     .string()
