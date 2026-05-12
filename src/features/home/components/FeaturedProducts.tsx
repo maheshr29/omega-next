@@ -21,6 +21,21 @@ async function fetchFeatured(): Promise<Product[]> {
 
 export async function FeaturedProducts() {
   const products = await fetchFeatured();
+
+  if (process.env.NODE_ENV !== "production") {
+    console.log("[featuredProducts] fetched products:");
+    console.dir(products, { depth: 6, colors: true });
+  } else {
+    logger.info(
+      {
+        requestedCodes: FEATURED_CODES,
+        fetchedCount: products.length,
+        codes: products.map((p) => p.code),
+      },
+      "featured-products.fetched",
+    );
+  }
+
   if (products.length === 0) return null;
   return <FeaturedProductsCarousel products={products} />;
 }
