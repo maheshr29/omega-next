@@ -1,42 +1,40 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { FeaturedProductsCarousel } from "@/features/home/components/FeaturedProductsCarousel";
-import { getProductByCode } from "@/server/domains/product/product.service";
-import { logger } from "@/server/observability/logger";
+import { FeaturedProductsFallback } from "@/features/home/components/FeaturedProductsFallback";
+import { fetchProductByCode } from "@/features/home/lib/sapClient";
 import type { Product } from "@/contracts/product";
 
 const FEATURED_CODES = ["HTC-030", "HTC-060", "HTC-120"] as const;
 
-async function fetchFeatured(): Promise<Product[]> {
-  const settled = await Promise.allSettled(
-    FEATURED_CODES.map((code) => getProductByCode(code)),
-  );
-  return settled.flatMap((r, i) => {
-    if (r.status === "fulfilled") return [r.value];
-    logger.warn(
-      { err: r.reason, code: FEATURED_CODES[i] },
-      "featured-products.fetch-failed",
-    );
-    return [];
-  });
-}
+export function FeaturedProducts() {
+  const [products, setProducts] = useState<Product[] | null>(null);
 
-export async function FeaturedProducts() {
-  const products = await fetchFeatured();
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const settled = await Promise.allSettled(
+        FEATURED_CODES.map((code) => fetchProductByCode(code)),
+      );
+      if (cancelled) return;
+      const ok = settled.flatMap((r, i) => {
+        if (r.status === "fulfilled") return [r.value];
+        console.warn(
+          `[FeaturedProducts] fetch failed for ${FEATURED_CODES[i]}`,
+          r.reason,
+        );
+        return [];
+      });
+      console.log("[FeaturedProducts] fetched products:", ok);
+      setProducts(ok);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  if (process.env.NODE_ENV !== "production") {
-    console.log("featuredProducts")
-    console.log("[featuredProducts] fetched products:");
-    console.dir(products, { depth: 6, colors: true });
-  } else {
-    logger.info(
-      {
-        requestedCodes: FEATURED_CODES,
-        fetchedCount: products.length,
-        codes: products.map((p) => p.code),
-      },
-      "featured-products.fetched",
-    );
-  }
-
+  if (products === null) return <FeaturedProductsFallback />;
   if (products.length === 0) return null;
   return <FeaturedProductsCarousel products={products} />;
 }
