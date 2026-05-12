@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { cacheTags, purgeTag } from "@/server/cache/tags";
+import { verifyWebhookSecret } from "@/server/lib/webhook";
 import { logger } from "@/server/observability/logger";
 
 export const runtime = "nodejs";
@@ -13,8 +14,15 @@ export const dynamic = "force-dynamic";
  * Body shape: { productCodes: string[], event?: "PRICE" | "STOCK" | "PUBLISH" }
  */
 export async function POST(req: NextRequest) {
-  const expected = process.env.SAP_COMMERCE_WEBHOOK_SECRET;
-  if (!expected || req.headers.get("x-webhook-secret") !== expected) {
+  const result = verifyWebhookSecret(
+    req.headers,
+    process.env.SAP_COMMERCE_WEBHOOK_SECRET,
+  );
+  if (result === "misconfigured") {
+    logger.error({}, "sap.webhook.secret-missing");
+    return NextResponse.json({ error: "misconfigured" }, { status: 500 });
+  }
+  if (result === "unauthorized") {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

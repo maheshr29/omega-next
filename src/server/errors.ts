@@ -38,7 +38,13 @@ export class UpstreamError extends BffError {
     message: string,
     cause?: unknown,
   ) {
-    super(`[${upstream}] ${message}`, status, "UPSTREAM_ERROR", undefined, cause);
+    super(
+      `[${upstream}] ${message}`,
+      status,
+      "UPSTREAM_ERROR",
+      undefined,
+      cause,
+    );
     this.name = "UpstreamError";
   }
 }

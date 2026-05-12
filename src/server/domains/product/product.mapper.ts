@@ -19,12 +19,15 @@ function absoluteImageUrl(url: string | undefined): string | undefined {
   return `${base.replace(/\/+$/, "")}${url.startsWith("/") ? url : `/${url}`}`;
 }
 
-function pickPrimaryImage(images: OccImage[] | undefined): ProductImage | undefined {
+function pickPrimaryImage(
+  images: OccImage[] | undefined,
+): ProductImage | undefined {
   if (!images?.length) return undefined;
   const primary =
     images.find((i) => i.imageType === "PRIMARY" && i.format === "product") ??
     images.find((i) => i.imageType === "PRIMARY") ??
     images[0];
+  if (!primary) return undefined;
   const url = absoluteImageUrl(primary.url);
   if (!url) return undefined;
   return {
@@ -71,7 +74,8 @@ export function toProduct(p: OccProduct): Product {
         }))
         .filter((i) => i.url) ?? [],
     categories:
-      p.categories?.map((c) => ({ code: c.code, name: c.name ?? c.code })) ?? [],
+      p.categories?.map((c) => ({ code: c.code, name: c.name ?? c.code })) ??
+      [],
     variants: p.variantOptions?.map((v) => ({
       code: v.code,
       name: v.name ?? v.code,

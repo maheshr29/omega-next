@@ -1,7 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ComponentType } from "react";
-import type { HelpCard, HelpSection as HelpSectionData } from "@/contracts/helpSection";
+import type {
+  HelpCard,
+  HelpSection as HelpSectionData,
+} from "@/contracts/helpSection";
 import { getHelpSection } from "@/server/domains/helpSection/helpSection.service";
 import { logger } from "@/server/observability/logger";
 
@@ -254,7 +257,11 @@ const DEFAULT_ICONS: (ComponentType | null)[] = [
 
 function DwyerOmegaMark() {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-6 w-6 text-[#D63D2E]">
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className="h-6 w-6 text-[#D63D2E]"
+    >
       <circle
         cx="12"
         cy="12"

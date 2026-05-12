@@ -29,24 +29,17 @@ export async function getHeader(): Promise<Header> {
 
     const mapped = toHeader(entry);
 
-    if (process.env.NODE_ENV !== "production") {
-      console.log("[header.service] raw entry fields:");
-      console.dir(entry.fields, { depth: 6, colors: true });
-      console.log("[header.service] mapped Header contract:");
-      console.dir(mapped, { depth: 6, colors: true });
-    } else {
-      logger.info(
-        {
-          entryId,
-          mainNavCount: mapped.mainNav.length,
-          utilityLinksCount: mapped.utilityLinks.length,
-          localesCount: mapped.locales.length,
-          hasAllProductsNav: !!mapped.allProductsNav,
-          hasLogo: !!mapped.logo.url,
-        },
-        "header.fetched",
-      );
-    }
+    logger.info(
+      {
+        entryId,
+        mainNavCount: mapped.mainNav.length,
+        utilityLinksCount: mapped.utilityLinks.length,
+        localesCount: mapped.locales.length,
+        hasAllProductsNav: !!mapped.allProductsNav,
+        hasLogo: !!mapped.logo.url,
+      },
+      "header.fetched",
+    );
 
     return mapped;
   } catch (err) {

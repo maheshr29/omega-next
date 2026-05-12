@@ -10,38 +10,17 @@ const envSchema = z.object({
     .string()
     .optional()
     .transform((v) => v === "true"),
-  CONTENTFUL_HEADER_ENTRY_ID: z
-    .string()
-    .min(1)
-    .default("4VHSB9TSwNw9lylmyfoynm"),
-  CONTENTFUL_FOOTER_ENTRY_ID: z
-    .string()
-    .min(1)
-    .default("3eST4tydgikBcCV0iCWmo"),
-  CONTENTFUL_HERO_BANNER_ENTRY_ID: z
-    .string()
-    .min(1)
-    .default("4O4rvOry7Hz1AbceWaagZE"),
-  CONTENTFUL_HELP_SECTION_ENTRY_ID: z
-    .string()
-    .min(1)
-    .default("7vV361Mnb543FSepENtTKj"),
-  CONTENTFUL_INDUSTRY_SECTION_ENTRY_ID: z
-    .string()
-    .min(1)
-    .default("32scu7Yc2lF4YqnxQhDVmW"),
+  CONTENTFUL_HEADER_ENTRY_ID: z.string().min(1),
+  CONTENTFUL_FOOTER_ENTRY_ID: z.string().min(1),
+  CONTENTFUL_HERO_BANNER_ENTRY_ID: z.string().min(1),
+  CONTENTFUL_HELP_SECTION_ENTRY_ID: z.string().min(1),
+  CONTENTFUL_INDUSTRY_SECTION_ENTRY_ID: z.string().min(1),
 
-  SAP_COMMERCE_BASE_URL: z
-    .string()
-    .url()
-    .default("https://dev1-api-hybris.omega.com/oews/v2"),
-  SAP_COMMERCE_BASE_SITE_ID: z.string().min(1).default("omegaengineeringus"),
-  SAP_COMMERCE_TOKEN_URL: z
-    .string()
-    .url()
-    .default("https://dev1-api-hybris.omega.com/authorizationserver/oauth/token"),
-  SAP_COMMERCE_CLIENT_ID: z.string().min(1).default("dwyeromegacpiId"),
-  SAP_COMMERCE_CLIENT_SECRET: z.string().min(1).default("dwyeromegacpiId1"),
+  SAP_COMMERCE_BASE_URL: z.url(),
+  SAP_COMMERCE_BASE_SITE_ID: z.string().min(1),
+  SAP_COMMERCE_TOKEN_URL: z.url(),
+  SAP_COMMERCE_CLIENT_ID: z.string().min(1),
+  SAP_COMMERCE_CLIENT_SECRET: z.string().min(1),
 
   BFF_PRODUCT_REVALIDATE_SECONDS: z
     .string()

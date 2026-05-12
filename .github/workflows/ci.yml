@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, typecheck, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+        env:
+          # Minimum env required by zod-validated config so `next build` doesn't
+          # crash. Real values come from the deploy environment.
+          CONTENTFUL_SPACE_ID: ci-space
+          CONTENTFUL_DELIVERY_TOKEN: ci-token
+          CONTENTFUL_HEADER_ENTRY_ID: ci-header
+          CONTENTFUL_FOOTER_ENTRY_ID: ci-footer
+          CONTENTFUL_HERO_BANNER_ENTRY_ID: ci-hero
+          CONTENTFUL_HELP_SECTION_ENTRY_ID: ci-help
+          CONTENTFUL_INDUSTRY_SECTION_ENTRY_ID: ci-industry
+          SAP_COMMERCE_BASE_URL: https://example.invalid/oews/v2
+          SAP_COMMERCE_BASE_SITE_ID: ci-site
+          SAP_COMMERCE_TOKEN_URL: https://example.invalid/authorizationserver/oauth/token
+          SAP_COMMERCE_CLIENT_ID: ci-client
+          SAP_COMMERCE_CLIENT_SECRET: ci-secret

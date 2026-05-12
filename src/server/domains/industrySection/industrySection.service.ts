@@ -26,21 +26,14 @@ export async function getIndustrySection(): Promise<IndustrySection> {
 
     const mapped = toIndustrySection(entry);
 
-    if (process.env.NODE_ENV !== "production") {
-      console.log("[industrySection.service] raw entry fields:");
-      console.dir(entry.fields, { depth: 6, colors: true });
-      console.log("[industrySection.service] mapped IndustrySection contract:");
-      console.dir(mapped, { depth: 6, colors: true });
-    } else {
-      logger.info(
-        {
-          entryId,
-          title: mapped.title,
-          cardsCount: mapped.cards.length,
-        },
-        "industrySection.fetched",
-      );
-    }
+    logger.info(
+      {
+        entryId,
+        title: mapped.title,
+        cardsCount: mapped.cards.length,
+      },
+      "industrySection.fetched",
+    );
 
     return mapped;
   } catch (err) {

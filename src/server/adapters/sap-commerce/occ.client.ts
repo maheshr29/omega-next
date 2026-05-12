@@ -66,7 +66,9 @@ function buildUrl(path: string, query?: OccRequestOptions["query"]): URL {
   const env = getEnv();
   const base = env.SAP_COMMERCE_BASE_URL.replace(/\/+$/, "");
   const site = env.SAP_COMMERCE_BASE_SITE_ID;
-  const url = new URL(`${base}/${site}${path.startsWith("/") ? path : `/${path}`}`);
+  const url = new URL(
+    `${base}/${site}${path.startsWith("/") ? path : `/${path}`}`,
+  );
   if (query) {
     for (const [k, v] of Object.entries(query)) {
       if (v !== undefined && v !== null) url.searchParams.set(k, String(v));

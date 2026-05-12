@@ -3,11 +3,24 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Brand tokens — use these instead of inline hex everywhere. */
+  --color-brand-navy: #1f2d63;
+  --color-brand-navy-hover: #16224d;
+  --color-brand-red: #d63d2e;
+  --color-brand-red-hover: #bc3526;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  /* Expose brand tokens to Tailwind as `bg-brand-navy`, `text-brand-red`, etc. */
+  --color-brand-navy: var(--color-brand-navy);
+  --color-brand-navy-hover: var(--color-brand-navy-hover);
+  --color-brand-red: var(--color-brand-red);
+  --color-brand-red-hover: var(--color-brand-red-hover);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
