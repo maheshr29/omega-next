@@ -96,7 +96,9 @@ function localeFromEntry(entry: AnyEntry): HeaderLocaleOption | null {
   return {
     code:
       explicitCode ||
-      (derivedCode ? `${derivedCode[1]}-${derivedCode[2]}`.toLowerCase() : undefined),
+      (derivedCode
+        ? `${derivedCode[1]}-${derivedCode[2]}`.toLowerCase()
+        : undefined),
     label,
     href,
     flag: assetToImage(fields.flag as Asset | undefined),
@@ -118,7 +120,8 @@ function buildAnnouncement(
   const linkHref = str(fields.announcementLinkUrl);
   return {
     text,
-    link: linkText && linkHref ? { label: linkText, href: linkHref } : undefined,
+    link:
+      linkText && linkHref ? { label: linkText, href: linkHref } : undefined,
   };
 }
 

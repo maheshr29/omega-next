@@ -26,21 +26,14 @@ export async function getHelpSection(): Promise<HelpSection> {
 
     const mapped = toHelpSection(entry);
 
-    if (process.env.NODE_ENV !== "production") {
-      console.log("[helpSection.service] raw entry fields:");
-      console.dir(entry.fields, { depth: 6, colors: true });
-      console.log("[helpSection.service] mapped HelpSection contract:");
-      console.dir(mapped, { depth: 6, colors: true });
-    } else {
-      logger.info(
-        {
-          entryId,
-          title: mapped.title,
-          cardsCount: mapped.cards.length,
-        },
-        "helpSection.fetched",
-      );
-    }
+    logger.info(
+      {
+        entryId,
+        title: mapped.title,
+        cardsCount: mapped.cards.length,
+      },
+      "helpSection.fetched",
+    );
 
     return mapped;
   } catch (err) {

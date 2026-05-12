@@ -26,23 +26,16 @@ export async function getHeroBanner(): Promise<HeroBanner> {
 
     const mapped = toHeroBanner(entry);
 
-    if (process.env.NODE_ENV !== "production") {
-      console.log("[heroBanner.service] raw entry fields:");
-      console.dir(entry.fields, { depth: 6, colors: true });
-      console.log("[heroBanner.service] mapped HeroBanner contract:");
-      console.dir(mapped, { depth: 6, colors: true });
-    } else {
-      logger.info(
-        {
-          entryId,
-          hasHeadline: !!mapped.headline,
-          hasPartnerLogo: !!mapped.partnerLogo,
-          hasProductImage: !!mapped.productImage,
-          hasReadMore: !!mapped.readMore,
-        },
-        "heroBanner.fetched",
-      );
-    }
+    logger.info(
+      {
+        entryId,
+        hasHeadline: !!mapped.headline,
+        hasPartnerLogo: !!mapped.partnerLogo,
+        hasProductImage: !!mapped.productImage,
+        hasReadMore: !!mapped.readMore,
+      },
+      "heroBanner.fetched",
+    );
 
     return mapped;
   } catch (err) {

@@ -65,13 +65,7 @@ function UtilityBar({ data }: { data: HeaderData }) {
   );
 }
 
-function MainBar({
-  data,
-  cartCount,
-}: {
-  data: HeaderData;
-  cartCount: number;
-}) {
+function MainBar({ data, cartCount }: { data: HeaderData; cartCount: number }) {
   const utilityLinks =
     data.utilityLinks.length > 0 ? data.utilityLinks : DEFAULT_UTILITY_LINKS;
 

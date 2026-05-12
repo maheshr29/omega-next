@@ -36,8 +36,7 @@ export function withBff<S extends BffSchemas, TOutput>(
   handler: BffHandler<S, TOutput>,
 ) {
   return async (req: NextRequest, ctx: RouteContext) => {
-    const requestId =
-      req.headers.get("x-request-id") ?? crypto.randomUUID();
+    const requestId = req.headers.get("x-request-id") ?? crypto.randomUUID();
     const log = logger.child({
       requestId,
       method: req.method,
@@ -47,30 +46,33 @@ export function withBff<S extends BffSchemas, TOutput>(
 
     try {
       const rawParams = ctx.params ? await ctx.params : {};
-      const params = (schemas.params
-        ? schemas.params.parse(rawParams)
-        : undefined) as Inferred<S["params"]>;
+      const params = (
+        schemas.params ? schemas.params.parse(rawParams) : undefined
+      ) as Inferred<S["params"]>;
 
-      const query = (schemas.query
-        ? schemas.query.parse(
-            Object.fromEntries(req.nextUrl.searchParams.entries()),
-          )
-        : undefined) as Inferred<S["query"]>;
+      const query = (
+        schemas.query
+          ? schemas.query.parse(
+              Object.fromEntries(req.nextUrl.searchParams.entries()),
+            )
+          : undefined
+      ) as Inferred<S["query"]>;
 
       let body: Inferred<S["body"]> = undefined as Inferred<S["body"]>;
       if (schemas.body) {
-        const parsed = req.method === "GET" || req.method === "HEAD"
-          ? undefined
-          : await req.json().catch(() => undefined);
+        const parsed =
+          req.method === "GET" || req.method === "HEAD"
+            ? undefined
+            : await req.json().catch(() => undefined);
         body = schemas.body.parse(parsed) as Inferred<S["body"]>;
       }
 
-      const result = await handler({ params, query, body }, { req, requestId, log });
-
-      log.info(
-        { durationMs: Date.now() - start, status: 200 },
-        "bff.ok",
+      const result = await handler(
+        { params, query, body },
+        { req, requestId, log },
       );
+
+      log.info({ durationMs: Date.now() - start, status: 200 }, "bff.ok");
 
       const res = NextResponse.json(result);
       res.headers.set("x-request-id", requestId);

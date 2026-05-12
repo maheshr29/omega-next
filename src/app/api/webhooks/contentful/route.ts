@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { cacheTags, purgeTag } from "@/server/cache/tags";
+import { verifyWebhookSecret } from "@/server/lib/webhook";
 import { logger } from "@/server/observability/logger";
 
 export const runtime = "nodejs";
@@ -11,8 +12,15 @@ export const dynamic = "force-dynamic";
  * and set the `x-webhook-secret` custom header to CONTENTFUL_WEBHOOK_SECRET.
  */
 export async function POST(req: NextRequest) {
-  const expected = process.env.CONTENTFUL_WEBHOOK_SECRET;
-  if (!expected || req.headers.get("x-webhook-secret") !== expected) {
+  const result = verifyWebhookSecret(
+    req.headers,
+    process.env.CONTENTFUL_WEBHOOK_SECRET,
+  );
+  if (result === "misconfigured") {
+    logger.error({}, "contentful.webhook.secret-missing");
+    return NextResponse.json({ error: "misconfigured" }, { status: 500 });
+  }
+  if (result === "unauthorized") {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

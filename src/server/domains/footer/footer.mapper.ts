@@ -178,7 +178,9 @@ export function toFooter(entry: AnyEntry): Footer {
         .map(linkGroupFromEntry)
         .filter((g): g is FooterLinkGroup => g !== null)
     : [];
-  const connect = connectFromEntry(fields.connectWithUs as AnyEntry | undefined);
+  const connect = connectFromEntry(
+    fields.connectWithUs as AnyEntry | undefined,
+  );
   const bottom = bottomFromEntry(fields.footerBottom as AnyEntry | undefined);
   return {
     quickLinks: quickLinks ?? undefined,

@@ -74,8 +74,7 @@ export function toPageContent(entry: AnyEntry): PageContent {
     slug: String(fields.slug ?? ""),
     title: String(fields.title ?? ""),
     seo: {
-      title:
-        typeof fields.seoTitle === "string" ? fields.seoTitle : undefined,
+      title: typeof fields.seoTitle === "string" ? fields.seoTitle : undefined,
       description:
         typeof fields.seoDescription === "string"
           ? fields.seoDescription

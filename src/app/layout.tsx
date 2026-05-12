@@ -21,28 +21,23 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "DwyerOmega",
-  description:
-    "DwyerOmega — measurement equipment and services for industry.",
+  description: "DwyerOmega — measurement equipment and services for industry.",
 };
 
 async function SiteHeader() {
-  try {
-    const data = await getHeader();
-    return <Header data={data} />;
-  } catch (err) {
+  const data = await getHeader().catch((err: unknown) => {
     logger.error({ err }, "header.fetch-failed");
-    return <HeaderFallback />;
-  }
+    return null;
+  });
+  return data ? <Header data={data} /> : <HeaderFallback />;
 }
 
 async function SiteFooter() {
-  try {
-    const data = await getFooter();
-    return <Footer data={data} />;
-  } catch (err) {
+  const data = await getFooter().catch((err: unknown) => {
     logger.error({ err }, "footer.fetch-failed");
-    return <FooterFallback />;
-  }
+    return null;
+  });
+  return data ? <Footer data={data} /> : <FooterFallback />;
 }
 
 export default function RootLayout({

@@ -155,12 +155,7 @@ function ArrowButton({
 
 function Chevron({ direction }: { direction: "prev" | "next" }) {
   return (
-    <svg
-      viewBox="0 0 16 16"
-      fill="none"
-      aria-hidden="true"
-      className="h-4 w-4"
-    >
+    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className="h-4 w-4">
       <path
         d={direction === "prev" ? "M10 3 L 5 8 L 10 13" : "M6 3 L 11 8 L 6 13"}
         stroke="currentColor"

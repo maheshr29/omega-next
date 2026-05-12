@@ -4,7 +4,6 @@ import { getProductByCode } from "@/server/domains/product/product.service";
 
 export const runtime = "nodejs";
 
-export const GET = withBff(
-  { params: productGetParamsSchema },
-  ({ params }) => getProductByCode(params.code),
+export const GET = withBff({ params: productGetParamsSchema }, ({ params }) =>
+  getProductByCode(params.code),
 );

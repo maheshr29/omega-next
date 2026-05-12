@@ -4,7 +4,6 @@ import { getPageBySlug } from "@/server/domains/content/content.service";
 
 export const runtime = "nodejs";
 
-export const GET = withBff(
-  { params: pageBySlugParamsSchema },
-  ({ params }) => getPageBySlug(params.slug),
+export const GET = withBff({ params: pageBySlugParamsSchema }, ({ params }) =>
+  getPageBySlug(params.slug),
 );

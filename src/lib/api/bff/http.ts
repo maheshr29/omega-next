@@ -1,14 +1,6 @@
-import type { PageContent } from "@/contracts/content";
 import type { BffErrorBody } from "@/contracts/error";
-import type { Footer } from "@/contracts/footer";
-import type { Header } from "@/contracts/header";
-import type {
-  Product,
-  ProductSearchParams,
-  ProductSearchResult,
-} from "@/contracts/product";
 
-class BffClientError extends Error {
+export class BffClientError extends Error {
   constructor(
     message: string,
     readonly status: number,
@@ -28,14 +20,19 @@ function bffBase(): string {
   return `http://127.0.0.1:${port}`;
 }
 
-async function bffFetch<T>(
+export type BffFetchInit = RequestInit & {
+  searchParams?: Record<string, string | number | undefined>;
+};
+
+export async function bffFetch<T>(
   path: string,
-  init?: RequestInit & {
-    searchParams?: Record<string, string | number | undefined>;
-  },
+  init?: BffFetchInit,
 ): Promise<T> {
   const isBrowser = typeof window !== "undefined";
-  const url = new URL(`/api/bff${path}`, isBrowser ? window.location.origin : bffBase());
+  const url = new URL(
+    `/api/bff${path}`,
+    isBrowser ? window.location.origin : bffBase(),
+  );
   if (init?.searchParams) {
     for (const [k, v] of Object.entries(init.searchParams)) {
       if (v !== undefined) url.searchParams.set(k, String(v));
@@ -55,16 +52,3 @@ async function bffFetch<T>(
   }
   return (await res.json()) as T;
 }
-
-export const bff = {
-  searchProducts: (params: ProductSearchParams) =>
-    bffFetch<ProductSearchResult>("/products", { searchParams: params }),
-  getProduct: (code: string) =>
-    bffFetch<Product>(`/products/${encodeURIComponent(code)}`),
-  getPage: (slug: string) =>
-    bffFetch<PageContent>(`/content/${encodeURIComponent(slug)}`),
-  getHeader: () => bffFetch<Header>("/header"),
-  getFooter: () => bffFetch<Footer>("/footer"),
-} as const;
-
-export { BffClientError };

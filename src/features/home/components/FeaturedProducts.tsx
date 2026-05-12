@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { FeaturedProductsCarousel } from "@/features/home/components/FeaturedProductsCarousel";
 import { FeaturedProductsFallback } from "@/features/home/components/FeaturedProductsFallback";
-import { fetchProductByCode } from "@/features/home/lib/sapClient";
+import { productsApi } from "@/lib/api/bff/products";
 import type { Product } from "@/contracts/product";
 
 const FEATURED_CODES = ["HTC-030", "HTC-060", "HTC-120"] as const;
@@ -15,7 +15,7 @@ export function FeaturedProducts() {
     let cancelled = false;
     (async () => {
       const settled = await Promise.allSettled(
-        FEATURED_CODES.map((code) => fetchProductByCode(code)),
+        FEATURED_CODES.map((code) => productsApi.get(code)),
       );
       if (cancelled) return;
       const ok = settled.flatMap((r, i) => {
@@ -26,7 +26,6 @@ export function FeaturedProducts() {
         );
         return [];
       });
-      console.log("[FeaturedProducts] fetched products:", ok);
       setProducts(ok);
     })();
     return () => {

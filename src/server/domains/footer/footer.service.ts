@@ -26,21 +26,16 @@ export async function getFooter(): Promise<Footer> {
 
     const mapped = toFooter(entry);
 
-    if (process.env.NODE_ENV !== "production") {
-      console.log("[footer.service] mapped Footer contract:");
-      console.dir(mapped, { depth: 6, colors: true });
-    } else {
-      logger.info(
-        {
-          entryId,
-          columnsCount: mapped.columns.length,
-          quickLinksCount: mapped.quickLinks?.links.length ?? 0,
-          socialLinksCount: mapped.connect?.socialLinks.length ?? 0,
-          legalLinksCount: mapped.bottom?.legalLinks.length ?? 0,
-        },
-        "footer.fetched",
-      );
-    }
+    logger.info(
+      {
+        entryId,
+        columnsCount: mapped.columns.length,
+        quickLinksCount: mapped.quickLinks?.links.length ?? 0,
+        socialLinksCount: mapped.connect?.socialLinks.length ?? 0,
+        legalLinksCount: mapped.bottom?.legalLinks.length ?? 0,
+      },
+      "footer.fetched",
+    );
 
     return mapped;
   } catch (err) {

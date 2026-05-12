@@ -108,14 +108,14 @@ Sanity-check: <http://localhost:3000/api/bff/health>
 
 ## BFF endpoints
 
-| Method | Path                                                            | Source        |
-| ------ | --------------------------------------------------------------- | ------------- |
-| GET    | `/api/bff/health`                                               | —             |
-| GET    | `/api/bff/products?q=&category=&page=&pageSize=&sort=`          | SAP Commerce  |
-| GET    | `/api/bff/products/[code]`                                      | SAP Commerce  |
-| GET    | `/api/bff/content/[slug]`                                       | Contentful    |
-| POST   | `/api/webhooks/contentful`                                      | Contentful    |
-| POST   | `/api/webhooks/sap-commerce`                                    | SAP Commerce  |
+| Method | Path                                                   | Source       |
+| ------ | ------------------------------------------------------ | ------------ |
+| GET    | `/api/bff/health`                                      | —            |
+| GET    | `/api/bff/products?q=&category=&page=&pageSize=&sort=` | SAP Commerce |
+| GET    | `/api/bff/products/[code]`                             | SAP Commerce |
+| GET    | `/api/bff/content/[slug]`                              | Contentful   |
+| POST   | `/api/webhooks/contentful`                             | Contentful   |
+| POST   | `/api/webhooks/sap-commerce`                           | SAP Commerce |
 
 ## Caching & invalidation
 
@@ -136,7 +136,11 @@ Webhook secrets — set `CONTENTFUL_WEBHOOK_SECRET` and `SAP_COMMERCE_WEBHOOK_SE
 // Server component — uses bff-client over HTTP for a uniform contract.
 import { bff } from "@/lib/bff-client";
 
-export default async function PDP({ params }: { params: Promise<{ code: string }> }) {
+export default async function PDP({
+  params,
+}: {
+  params: Promise<{ code: string }>;
+}) {
   const { code } = await params;
   const product = await bff.getProduct(code);
   return <pre>{JSON.stringify(product, null, 2)}</pre>;
