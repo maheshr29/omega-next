@@ -2,14 +2,21 @@
 
 import type { Product, ProductImage } from "@/contracts/product";
 
-// WARNING: these credentials ship to the browser. Anyone can read them in DevTools
-// and use them to call SAP as this app. Only acceptable for short-lived demos.
-const SAP_BASE_URL = "https://dev1-api-hybris.omega.com/oews/v2";
-const SAP_BASE_SITE_ID = "omegaengineeringus";
+// WARNING: NEXT_PUBLIC_* env vars are inlined into the client bundle at build
+// time. Anyone visiting the site can read these values from DevTools. This is
+// only acceptable for short-lived demos — rotate the secret after.
+const SAP_BASE_URL =
+  process.env.NEXT_PUBLIC_SAP_BASE_URL ??
+  "https://dev1-api-hybris.omega.com/oews/v2";
+const SAP_BASE_SITE_ID =
+  process.env.NEXT_PUBLIC_SAP_BASE_SITE_ID ?? "omegaengineeringus";
 const SAP_TOKEN_URL =
+  process.env.NEXT_PUBLIC_SAP_TOKEN_URL ??
   "https://dev1-api-hybris.omega.com/authorizationserver/oauth/token";
-const SAP_CLIENT_ID = "dwyeromegacpiId";
-const SAP_CLIENT_SECRET = "dwyeromegacpiId1";
+const SAP_CLIENT_ID =
+  process.env.NEXT_PUBLIC_SAP_CLIENT_ID ?? "dwyeromegacpiId";
+const SAP_CLIENT_SECRET =
+  process.env.NEXT_PUBLIC_SAP_CLIENT_SECRET ?? "dwyeromegacpiId1";
 
 const PRODUCT_FIELDS =
   "FULL,images(FULL),categories(FULL),variantOptions(FULL),price(FULL),stock(FULL)";
