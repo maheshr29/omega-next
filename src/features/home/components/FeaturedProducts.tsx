@@ -23,6 +23,7 @@ export async function FeaturedProducts() {
   const products = await fetchFeatured();
 
   if (process.env.NODE_ENV !== "production") {
+    console.log("featuredProducts")
     console.log("[featuredProducts] fetched products:");
     console.dir(products, { depth: 6, colors: true });
   } else {
