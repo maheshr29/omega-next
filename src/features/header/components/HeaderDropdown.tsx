@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import type { HeaderLink } from "@/contracts/header";
 
 type Layout = "list" | "mega";
@@ -83,7 +90,7 @@ function dropdownPanelClass(layout: Layout, align: "left" | "right") {
     "absolute top-full z-50 mt-0 border border-zinc-200 bg-white text-zinc-900 shadow-lg";
   const placement = align === "right" ? "right-0" : "left-0";
   if (layout === "mega") {
-    return `${base} ${placement} w-[640px] max-w-[90vw] p-6`;
+    return `${base} ${placement} w-max max-w-[95vw] overflow-hidden`;
   }
   return `${base} ${placement} min-w-56 py-2`;
 }
@@ -113,31 +120,64 @@ function MegaPanel({
   items: HeaderLink[];
   onNavigate: () => void;
 }) {
+  const categories = useMemo(
+    () => items.filter((item) => (item.children?.length ?? 0) > 0 || item.href),
+    [items],
+  );
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const active = activeIndex !== null ? categories[activeIndex] : null;
+
+  if (categories.length === 0) return null;
+
   return (
-    <div className="grid grid-cols-2 gap-x-8 gap-y-6 md:grid-cols-3">
-      {items.map((column) => (
-        <div key={`${column.label}-${column.href ?? ""}`}>
-          <DropdownColumnHeader item={column} onNavigate={onNavigate} />
-          {column.children && column.children.length > 0 && (
-            <ul className="mt-2 flex flex-col gap-1">
-              {column.children.map((child) => (
+    <div className="flex min-h-[440px]">
+      <ul className="w-[300px] shrink-0 bg-zinc-50 py-2">
+        {categories.map((category, index) => {
+          const isActive = index === activeIndex;
+          return (
+            <li key={`${category.label}-${category.href ?? ""}`}>
+              <button
+                type="button"
+                onClick={() => setActiveIndex(index)}
+                className={[
+                  "flex w-full items-center justify-between gap-3 px-6 py-3 text-left text-[15px] transition-colors",
+                  isActive
+                    ? "bg-white font-semibold text-[#1F2D63]"
+                    : "text-zinc-800 hover:bg-white hover:text-[#1F2D63]",
+                ].join(" ")}
+                aria-current={isActive ? "true" : undefined}
+              >
+                <span>{category.label}</span>
+                <ChevronRight className="h-3.5 w-3.5 text-zinc-500" />
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+
+      {active && (
+        <div className="w-auto px-8 py-6">
+          <ActiveCategoryHeader item={active} onNavigate={onNavigate} />
+          {active.children && active.children.length > 0 && (
+            <ul className="mt-4 flex flex-col">
+              {active.children.map((child) => (
                 <li key={`${child.label}-${child.href ?? ""}`}>
                   <DropdownLink
                     item={child}
                     onNavigate={onNavigate}
-                    className="block px-0 py-1 text-sm text-zinc-700 hover:text-[#1F2D63]"
+                    className="block py-1 text-[15px] text-zinc-800 hover:text-[#1F2D63] hover:underline"
                   />
                 </li>
               ))}
             </ul>
           )}
         </div>
-      ))}
+      )}
     </div>
   );
 }
 
-function DropdownColumnHeader({
+function ActiveCategoryHeader({
   item,
   onNavigate,
 }: {
@@ -145,17 +185,36 @@ function DropdownColumnHeader({
   onNavigate: () => void;
 }) {
   const className =
-    "text-sm font-semibold uppercase tracking-wide text-[#1F2D63]";
+    "inline-block border-b-2 border-[#1F2D63] pb-1 text-lg font-medium text-zinc-900";
   if (item.href) {
     return (
       <DropdownLink
         item={item}
         onNavigate={onNavigate}
-        className={`${className} hover:underline`}
+        className={`${className} hover:text-[#1F2D63]`}
       />
     );
   }
   return <span className={className}>{item.label}</span>;
+}
+
+function ChevronRight({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 12 12"
+      fill="none"
+      aria-hidden="true"
+      className={className}
+    >
+      <path
+        d="m4.5 3 3 3-3 3"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 
 function DropdownLink({
