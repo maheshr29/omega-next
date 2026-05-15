@@ -34,6 +34,16 @@ export function FeaturedProducts() {
   }, []);
 
   if (products === null) return <FeaturedProductsFallback />;
-  if (products.length === 0) return null;
+  if (products.length === 0) {
+    return (
+      <section className="bg-white py-14">
+        <div className="mx-auto max-w-7xl px-6">
+          <h2 className="mb-10 text-center text-2xl font-bold text-zinc-900">
+            Featured Products
+          </h2>
+        </div>
+      </section>
+    );
+  }
   return <FeaturedProductsCarousel products={products} />;
 }
