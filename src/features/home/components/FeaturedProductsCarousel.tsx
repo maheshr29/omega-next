@@ -8,11 +8,15 @@ import type { Product } from "@/contracts/product";
 type Props = {
   products: Product[];
   browseAllHref?: string;
+  title?: string;
+  ctaText?: string;
 };
 
 export function FeaturedProductsCarousel({
   products,
   browseAllHref = "/products",
+  title = "Featured Products",
+  ctaText = "Browse all Products",
 }: Props) {
   const scrollerRef = useRef<HTMLUListElement>(null);
   const [canPrev, setCanPrev] = useState(false);
@@ -46,10 +50,10 @@ export function FeaturedProductsCarousel({
   };
 
   return (
-    <section className="bg-white py-14">
-      <div className="mx-auto max-w-7xl px-6">
-        <h2 className="mb-10 text-center text-2xl font-bold text-zinc-900">
-          Featured Products
+    <section className="bg-white py-10 sm:py-14">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <h2 className="mb-8 text-center text-xl font-bold text-zinc-900 sm:mb-10 sm:text-2xl md:text-3xl">
+          {title}
         </h2>
 
         <div className="relative">
@@ -61,13 +65,13 @@ export function FeaturedProductsCarousel({
 
           <ul
             ref={scrollerRef}
-            className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-12 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 sm:gap-6 sm:px-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {products.map((product) => (
               <li
                 key={product.code}
                 data-carousel-item
-                className="w-full shrink-0 snap-start sm:w-1/2 lg:w-1/4"
+                className="w-3/4 shrink-0 snap-start sm:w-1/2 lg:w-1/4"
               >
                 <FeaturedCard product={product} />
               </li>
@@ -86,7 +90,7 @@ export function FeaturedProductsCarousel({
             href={browseAllHref}
             className="inline-flex items-center justify-center rounded-full bg-[#1F2D63] px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#16224d]"
           >
-            Browse all Products
+            {ctaText}
           </Link>
         </div>
       </div>
@@ -144,7 +148,7 @@ function ArrowButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={isPrev ? "Previous products" : "Next products"}
-      className={`absolute top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-[#1F2D63]/40 bg-white text-[#1F2D63] shadow-sm transition hover:border-[#1F2D63] hover:bg-[#1F2D63] hover:text-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-[#1F2D63] ${
+      className={`absolute top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-[#1F2D63]/40 bg-white text-[#1F2D63] shadow-sm transition hover:border-[#1F2D63] hover:bg-[#1F2D63] hover:text-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-[#1F2D63] sm:flex ${
         isPrev ? "-left-2" : "-right-2"
       }`}
     >

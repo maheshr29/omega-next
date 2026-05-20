@@ -5,8 +5,6 @@ import type {
   HelpCard,
   HelpSection as HelpSectionData,
 } from "@/contracts/helpSection";
-import { getHelpSection } from "@/server/domains/helpSection/helpSection.service";
-import { logger } from "@/server/observability/logger";
 
 const DEFAULT_HREFS = [
   "/contact-us",
@@ -65,25 +63,22 @@ function hrefFor(card: HelpCard, index: number): string {
   return card.href ?? DEFAULT_HREFS[index] ?? "#";
 }
 
-export async function HelpSection() {
-  let data: HelpSectionData;
-  try {
-    data = await getHelpSection();
-    if (data.cards.length === 0) data = FALLBACK_HELP_SECTION;
-  } catch (err) {
-    logger.error({ err }, "helpSection.fetch-failed");
-    data = FALLBACK_HELP_SECTION;
-  }
+type HelpSectionProps = {
+  data?: HelpSectionData;
+};
 
+export function HelpSection({ data: input }: HelpSectionProps = {}) {
+  const data =
+    input && input.cards.length > 0 ? input : FALLBACK_HELP_SECTION;
   const { bold, rest } = splitTitle(data.title);
   const [contactCard, ...restCards] = data.cards;
   const smallCards = restCards.slice(0, 2);
   const storyCard = restCards[2];
 
   return (
-    <section className="bg-zinc-100 py-14">
-      <div className="mx-auto max-w-7xl px-6">
-        <h2 className="mb-8 text-2xl">
+    <section className="bg-zinc-100 py-10 sm:py-14">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <h2 className="mb-6 text-xl sm:mb-8 sm:text-2xl md:text-3xl">
           <span className="font-bold text-zinc-900">{bold}</span>
           {rest ? <span className="text-zinc-500"> {rest}</span> : null}
         </h2>
@@ -132,7 +127,7 @@ function ContactCard({ card, href }: { card: HelpCard; href: string }) {
         ) : null}
       </div>
       {card.image?.url ? (
-        <div className="relative mt-auto h-64 w-full">
+        <div className="relative mt-auto h-48 w-full sm:h-56 md:h-64">
           <Image
             src={card.image.url}
             alt={card.image.alt ?? ""}
@@ -157,8 +152,8 @@ function SmallCard({
 }) {
   const isExternal = /^https?:\/\//i.test(href);
   const inner = (
-    <article className="group flex h-full items-center gap-5 rounded-sm bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
-      <div className="flex h-16 w-16 shrink-0 items-center justify-center">
+    <article className="group flex h-full items-center gap-3 rounded-sm bg-white p-4 shadow-sm transition-shadow hover:shadow-md sm:gap-5 sm:p-5">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center sm:h-16 sm:w-16">
         {card.icon?.url ? (
           <Image
             src={card.icon.url}

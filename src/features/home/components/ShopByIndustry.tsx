@@ -4,8 +4,6 @@ import type {
   IndustryCard,
   IndustrySection,
 } from "@/contracts/industrySection";
-import { getIndustrySection } from "@/server/domains/industrySection/industrySection.service";
-import { logger } from "@/server/observability/logger";
 
 function slugify(label: string): string {
   return label
@@ -33,23 +31,20 @@ function splitTitle(title: string): { bold: string; rest: string } {
   };
 }
 
-export async function ShopByIndustry() {
-  let data: IndustrySection | null = null;
-  try {
-    data = await getIndustrySection();
-  } catch (err) {
-    logger.error({ err }, "industrySection.fetch-failed");
-  }
+type ShopByIndustryProps = {
+  data?: IndustrySection;
+};
 
+export function ShopByIndustry({ data }: ShopByIndustryProps = {}) {
   if (!data || data.cards.length === 0) return null;
 
   const { bold, rest } = splitTitle(data.title);
 
   return (
-    <section className="bg-white py-14">
-      <div className="mx-auto max-w-7xl px-6">
+    <section className="bg-white py-10 sm:py-14">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {data.title ? (
-          <h2 className="mb-8 text-center text-2xl">
+          <h2 className="mb-6 text-center text-xl sm:mb-8 sm:text-2xl md:text-3xl">
             <span className="font-bold text-zinc-900">{bold}</span>
             {rest ? <span className="text-zinc-500"> {rest}</span> : null}
           </h2>
@@ -92,7 +87,7 @@ function IndustryTileCard({
       ) : (
         <div className="absolute inset-0 bg-zinc-200" aria-hidden="true" />
       )}
-      <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-md bg-white/90 px-6 py-2 text-base font-semibold text-zinc-900 shadow">
+      <span className="absolute left-1/2 top-1/2 max-w-[85%] -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-white/90 px-4 py-1.5 text-center text-sm font-semibold text-zinc-900 shadow sm:px-6 sm:py-2 sm:text-base">
         {card.label}
       </span>
     </Link>

@@ -13,11 +13,7 @@ export const cacheTags = {
   contentPage: (slug: string) => `content:page:${slug}`,
   contentAll: () => "content:all",
 
-  header: () => "content:header",
-  footer: () => "content:footer",
-  heroBanner: () => "content:hero-banner",
-  helpSection: () => "content:help-section",
-  industrySection: () => "content:industry-section",
+  homePage: () => "content:home-page",
 } as const;
 
 export type CacheTag = ReturnType<(typeof cacheTags)[keyof typeof cacheTags]>;
