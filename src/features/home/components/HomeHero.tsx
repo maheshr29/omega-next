@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { HeroBanner } from "@/contracts/heroBanner";
-import { getHeroBanner } from "@/server/domains/heroBanner/heroBanner.service";
-import { logger } from "@/server/observability/logger";
 
 const FALLBACK_BANNER: HeroBanner = {
   headline:
@@ -20,21 +18,19 @@ const FALLBACK_BANNER: HeroBanner = {
   readMore: { label: "Read more", href: "/news/burns-engineering" },
 };
 
-export async function HomeHero() {
-  let banner: HeroBanner;
-  try {
-    banner = await getHeroBanner();
-  } catch (err) {
-    logger.error({ err }, "heroBanner.fetch-failed");
-    banner = FALLBACK_BANNER;
-  }
+type HomeHeroProps = {
+  data?: HeroBanner;
+};
 
+export function HomeHero({ data: banner = FALLBACK_BANNER }: HomeHeroProps = {}) {
   return (
     <section className="bg-zinc-100">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-6 py-10 lg:grid-cols-[1fr_minmax(320px,1.2fr)_360px] lg:gap-10">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-6 px-4 py-8 sm:px-6 sm:py-10 md:grid-cols-2 md:gap-8 lg:grid-cols-[1fr_minmax(320px,1.2fr)_360px] lg:gap-10">
         <PartnerAnnouncement banner={banner} />
         <ProductShowcase banner={banner} />
-        <QuickOrderPanel />
+        <div className="md:col-span-2 lg:col-span-1">
+          <QuickOrderPanel />
+        </div>
       </div>
     </section>
   );
@@ -54,7 +50,7 @@ function PartnerAnnouncement({ banner }: { banner: HeroBanner }) {
           priority
         />
       ) : null}
-      <p className="mt-4 max-w-md text-3xl font-bold leading-tight text-[#1F2D63]">
+      <p className="mt-4 max-w-md text-2xl font-bold leading-tight text-[#1F2D63] sm:text-3xl">
         {banner.headline}
       </p>
       {banner.readMore && (
@@ -72,10 +68,10 @@ function PartnerAnnouncement({ banner }: { banner: HeroBanner }) {
 function ProductShowcase({ banner }: { banner: HeroBanner }) {
   const image = banner.productImage;
   if (!image?.url) {
-    return <div className="relative h-56 w-full lg:h-72" aria-hidden="true" />;
+    return <div className="relative h-48 w-full sm:h-56 lg:h-72" aria-hidden="true" />;
   }
   return (
-    <div className="relative h-56 w-full overflow-hidden lg:h-72">
+    <div className="relative h-48 w-full overflow-hidden sm:h-56 lg:h-72">
       <Image
         src={image.url}
         alt={image.alt ?? ""}

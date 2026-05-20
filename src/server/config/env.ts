@@ -10,11 +10,7 @@ const envSchema = z.object({
     .string()
     .optional()
     .transform((v) => v === "true"),
-  CONTENTFUL_HEADER_ENTRY_ID: z.string().min(1),
-  CONTENTFUL_FOOTER_ENTRY_ID: z.string().min(1),
-  CONTENTFUL_HERO_BANNER_ENTRY_ID: z.string().min(1),
-  CONTENTFUL_HELP_SECTION_ENTRY_ID: z.string().min(1),
-  CONTENTFUL_INDUSTRY_SECTION_ENTRY_ID: z.string().min(1),
+  CONTENTFUL_HOME_PAGE_ENTRY_ID: z.string().min(1),
 
   SAP_COMMERCE_BASE_URL: z.url(),
   SAP_COMMERCE_BASE_SITE_ID: z.string().min(1),

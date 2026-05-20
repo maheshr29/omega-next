@@ -1,12 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Footer } from "@/features/footer/components/Footer";
-import { FooterFallback } from "@/features/footer/components/FooterFallback";
-import { Header } from "@/features/header/components/Header";
-import { HeaderFallback } from "@/features/header/components/HeaderFallback";
-import { getFooter } from "@/server/domains/footer/footer.service";
-import { getHeader } from "@/server/domains/header/header.service";
-import { logger } from "@/server/observability/logger";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -24,22 +17,6 @@ export const metadata: Metadata = {
   description: "DwyerOmega — measurement equipment and services for industry.",
 };
 
-async function SiteHeader() {
-  const data = await getHeader().catch((err: unknown) => {
-    logger.error({ err }, "header.fetch-failed");
-    return null;
-  });
-  return data ? <Header data={data} /> : <HeaderFallback />;
-}
-
-async function SiteFooter() {
-  const data = await getFooter().catch((err: unknown) => {
-    logger.error({ err }, "footer.fetch-failed");
-    return null;
-  });
-  return data ? <Footer data={data} /> : <FooterFallback />;
-}
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -50,11 +27,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <SiteHeader />
-        <main className="flex-1">{children}</main>
-        <SiteFooter />
-      </body>
+      <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }
