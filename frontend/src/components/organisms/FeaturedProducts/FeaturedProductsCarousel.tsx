@@ -156,7 +156,6 @@ function ArrowButton({
     </button>
   );
 }
-
 function Chevron({ direction }: { direction: "prev" | "next" }) {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className="h-4 w-4">
