@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/customer-gwa/packages/caromatrade/backend/**)",
+      "Read(//d/customer-gwa/packages/caromatrade/frontend/**)"
+    ]
+  }
+}

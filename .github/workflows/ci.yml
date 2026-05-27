@@ -12,9 +12,16 @@ concurrency:
 
 jobs:
   verify:
-    name: Lint, typecheck, build
+    name: Lint, typecheck, build (${{ matrix.app }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [frontend, backend]
+    defaults:
+      run:
+        working-directory: ${{ matrix.app }}
 
     steps:
       - uses: actions/checkout@v4
@@ -23,12 +30,14 @@ jobs:
         with:
           node-version: "20"
           cache: npm
+          cache-dependency-path: ${{ matrix.app }}/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
       - name: Format check
         run: npm run format:check
+        continue-on-error: true # phase 11 will land prettier configs
 
       - name: Lint
         run: npm run lint
@@ -39,17 +48,56 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          # Minimum env required by zod-validated config so `next build` doesn't
-          # crash. Real values come from the deploy environment.
+          # Minimum env required by zod-validated config so builds don't crash.
+          # Real values come from the deploy environment (Vercel UI).
+          # Frontend only reads NEXT_PUBLIC_*; backend needs the upstream creds
+          # so its app.ts boot-time `getEnv()` doesn't throw.
+          NEXT_PUBLIC_BACKEND_BASE_URL: http://localhost:4000
           CONTENTFUL_SPACE_ID: ci-space
           CONTENTFUL_DELIVERY_TOKEN: ci-token
-          CONTENTFUL_HEADER_ENTRY_ID: ci-header
-          CONTENTFUL_FOOTER_ENTRY_ID: ci-footer
-          CONTENTFUL_HERO_BANNER_ENTRY_ID: ci-hero
-          CONTENTFUL_HELP_SECTION_ENTRY_ID: ci-help
-          CONTENTFUL_INDUSTRY_SECTION_ENTRY_ID: ci-industry
-          SAP_COMMERCE_BASE_URL: https://example.invalid/oews/v2
+          CONTENTFUL_HOME_PAGE_ENTRY_ID: ci-home
+          SAP_COMMERCE_BASE_URL: https://example.invalid/occ/v2
           SAP_COMMERCE_BASE_SITE_ID: ci-site
           SAP_COMMERCE_TOKEN_URL: https://example.invalid/authorizationserver/oauth/token
           SAP_COMMERCE_CLIENT_ID: ci-client
           SAP_COMMERCE_CLIENT_SECRET: ci-secret
+
+  deploy:
+    name: Deploy ${{ matrix.app }} to Vercel
+    needs: verify
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: frontend
+            project_id_secret: VERCEL_FRONTEND_PROJECT_ID
+          - app: backend
+            project_id_secret: VERCEL_BACKEND_PROJECT_ID
+    defaults:
+      run:
+        working-directory: ${{ matrix.app }}
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets[matrix.project_id_secret] }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Pull Vercel environment
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Vercel build
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Vercel deploy
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}

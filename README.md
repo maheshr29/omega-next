@@ -1,157 +1,150 @@
 # omega-next
 
-Large-scale Next.js 16 storefront with a **Backend-for-Frontend (BFF)** layer fronting **Contentful** (CMS) and **SAP Commerce** (PIM/cart). Architected for many domains, many teams, and long-lived schemas.
+Three-folder commerce monorepo:
 
-## Layered architecture
+- **`frontend/`** — Next.js 16 storefront. Atomic-design components, SWR-ready, Tailwind. Talks to the backend over HTTP (no upstream credentials live here).
+- **`backend/`** — Node Hono service. Owns every third-party integration (SAP Commerce, Contentful, …). One folder per vendor with the same internal shape: `routes/ apis/ mappers/ schemas/ interfaces/ utils/`.
+- **`types/`** — TypeScript-only shared contracts (`Product`, `PageContent`, `HomePage`, etc.). No `package.json`. Consumed via `tsconfig.paths`: `@Types/*` in backend, `@shared/types/*` in frontend.
 
-```
-         ┌──────────────────────────────────────┐
-Browser ─►   /api/bff/*  (Route Handlers)        │
-         │   • zod validation, requestId, logs   │
-         │   • uniform error envelope            │
-         └──────────────┬───────────────────────┘
-                        ▼
-              server/domains/<domain>/         use-cases, DTO mapping, schemas
-                        │
-                        ▼
-              server/adapters/<system>/        Contentful / OCC clients,
-                                              raw upstream types only
-```
+No workspace tooling — each app installs and deploys independently.
 
-The frontend depends only on `@/contracts/*`. Domains depend on adapters. Adapters know about upstream systems but never about contracts. Contracts are the wire format — change them deliberately.
-
-## Folder layout
+## Repository layout
 
 ```
-src/
-├─ app/
-│  ├─ (storefront)/                    # route groups for marketing/PDP/PLP — add as needed
-│  ├─ api/
-│  │  ├─ bff/                          # public BFF endpoints (typed, validated)
-│  │  │  ├─ products/route.ts          # GET /api/bff/products
-│  │  │  ├─ products/[code]/route.ts   # GET /api/bff/products/[code]
-│  │  │  ├─ content/[slug]/route.ts    # GET /api/bff/content/[slug]
-│  │  │  └─ health/route.ts
-│  │  └─ webhooks/                     # cache invalidation hooks
-│  │     ├─ contentful/route.ts
-│  │     └─ sap-commerce/route.ts
-│  ├─ layout.tsx
-│  └─ page.tsx
-│
-├─ contracts/                          # ⭐ public BFF contract — types only, no runtime deps
-│  ├─ product.ts
-│  ├─ content.ts
-│  └─ error.ts
-│
-├─ server/                             # server-only code (guarded with `import "server-only"`)
-│  ├─ domains/                         # ⭐ business domains — co-located service/mapper/schema
-│  │  ├─ product/
-│  │  │  ├─ product.service.ts         # use-cases (getByCode, search…)
-│  │  │  ├─ product.mapper.ts          # OCC → contract DTO
-│  │  │  └─ product.schema.ts          # zod request schemas
-│  │  └─ content/
-│  │     ├─ content.service.ts
-│  │     ├─ content.mapper.ts
-│  │     └─ content.schema.ts
-│  ├─ adapters/                        # ⭐ upstream I/O, swappable
-│  │  ├─ sap-commerce/
-│  │  │  ├─ occ.client.ts              # OAuth, fetch, retry on 401
-│  │  │  └─ occ.types.ts               # raw OCC shapes (internal)
-│  │  └─ contentful/
-│  │     └─ contentful.client.ts
-│  ├─ http/
-│  │  └─ handler.ts                    # withBff() wrapper — validation, requestId, errors
-│  ├─ cache/
-│  │  └─ tags.ts                       # cacheTags vocabulary for revalidateTag()
-│  ├─ observability/
-│  │  └─ logger.ts                     # JSON structured logger w/ child bindings
-│  ├─ config/
-│  │  └─ env.ts                        # zod-validated process.env
-│  └─ errors.ts                        # BffError, ValidationError, NotFoundError, UpstreamError
-│
-├─ features/                           # ⭐ frontend features (UI + hooks per domain)
-│  └─ product/
-│     └─ components/ProductCard.tsx
-│
-├─ components/ui/                      # generic primitives (Skeleton, Button…)
-└─ lib/
-   └─ bff-client.ts                    # typed fetcher around /api/bff
+omega-next/
+├─ frontend/                              # Next.js 16 storefront
+│  └─ src/
+│     ├─ app/                             # App Router pages, layouts
+│     ├─ components/                      # ⭐ atomic design
+│     │  ├─ atoms/        (Skeleton)
+│     │  ├─ molecules/    (ProductCard)
+│     │  ├─ organisms/    (Header, Footer, HomeHero, FeaturedProducts, …)
+│     │  └─ pages/        (Home/sectionMap, …)
+│     ├─ lib/api/bff/                     # typed HTTP client → backend
+│     ├─ instrumentation.ts
+│     └─ middleware.ts                    # x-request-id propagation
+├─ backend/                               # Node Hono service
+│  ├─ src/
+│  │  ├─ server.ts                        # local dev entry (Node listener on :4000)
+│  │  ├─ app.ts                           # Hono app wiring (CORS, request-id, routes)
+│  │  ├─ commerce-sap/                    # SAP Commerce vendor (routes/apis/mappers/schemas/interfaces/utils)
+│  │  ├─ content-contentful/              # Contentful vendor (same shape)
+│  │  ├─ webhooks/                        # contentful + sap-commerce signature-verified receivers
+│  │  ├─ http/with-bff.ts                 # zod validation + structured logging wrapper
+│  │  ├─ cache/{tags,store}.ts            # tag vocabulary + in-memory invalidation
+│  │  ├─ observability/logger.ts          # JSON structured logger
+│  │  ├─ config/env.ts                    # zod-validated env
+│  │  ├─ lib/webhook.ts                   # signature verification
+│  │  ├─ errors.ts                        # BffError hierarchy
+│  │  └─ middlewares/                     # request-id, request-logger, error-handler, cache-control
+│  └─ api/[[...route]].ts                 # Vercel serverless catch-all (wraps the Hono app)
+└─ types/                                 # shared TS types — no package.json
+   ├─ product/   content/   header/   footer/
+   ├─ helpSection/   heroBanner/   industrySection/
+   ├─ featuredProductsSection/   homePage/
+   └─ error/
 ```
 
-## Conventions
+## Boundary rules
 
-- **Frontend never imports from `@/server/*`.** It imports types from `@/contracts/*` and uses `@/lib/bff-client`.
-- **Domains never import from other domains' internals.** If two domains share logic, lift it to a sibling under `server/` or expose it via a service.
-- **Adapters never import contracts.** They speak raw upstream types; mapping is the domain's job.
-- **All routes use `withBff(schemas, handler)`.** Routes don't read `request.json()` or call `NextResponse.json` directly.
-- **Cache tags come from `cacheTags`.** Never write inline tag strings.
-- **Errors throw `BffError` subclasses** — `withBff` maps them to a uniform envelope.
+- **Frontend never imports from `backend/`** — only `@shared/types/*` crosses the boundary. The BFF client at `frontend/src/lib/api/bff/` is the only path to backend data.
+- **Backend never imports from `frontend/`** — same.
+- **Vendor folders inside backend may import each other** — e.g. a commerce route can call into `Content-contentful/apis/...` if a domain needs both upstream systems. The hard boundary is `frontend/`↔`backend/`, not inside `backend/`.
+- **Adapter clients (`utils/occ-client.ts`, `utils/contentful-client.ts`) never import shared types.** They return raw upstream shapes from `interfaces/`. Mappers translate to `@Types/*`.
 
-## Adding a new BFF endpoint
-
-1. Add types to `src/contracts/<domain>.ts` (or extend an existing file).
-2. Add a service function in `src/server/domains/<domain>/<domain>.service.ts`.
-3. Add a zod request schema in `<domain>.schema.ts`.
-4. Add the route file under `src/app/api/bff/...` — three lines using `withBff`.
-5. Add a method on `bff` in `src/lib/bff-client.ts`.
-
-## Setup
+## Local development
 
 ```powershell
-Copy-Item .env.example .env.local
-# fill in Contentful + SAP Commerce credentials, then:
-npm install
-npm run dev
+# One-time install per folder
+cd frontend; npm install
+cd ..\backend; npm install
+
+# Run both (two terminals)
+cd backend;  npm run dev     # http://localhost:4000 — Hono + tsx watch
+cd frontend; npm run dev     # http://localhost:3000 — Next.js
 ```
 
-Sanity-check: <http://localhost:3000/api/bff/health>
+Health check: <http://localhost:4000/health>
+Sample BFF call: <http://localhost:4000/bff/homepage>
+
+### Environment files
+
+| File | Purpose |
+| --- | --- |
+| `frontend/.env.local` | `NEXT_PUBLIC_BACKEND_BASE_URL=http://localhost:4000` plus any `NEXT_PUBLIC_*` |
+| `backend/.env` | All upstream credentials — Contentful (space, tokens, entry id), SAP Commerce (OAuth + base URL), webhook secrets. `dotenv` loads this in dev. |
+
+See `frontend/.env.example` and `backend/.env.example` for the full list.
 
 ## BFF endpoints
 
-| Method | Path                                                   | Source       |
-| ------ | ------------------------------------------------------ | ------------ |
-| GET    | `/api/bff/health`                                      | —            |
-| GET    | `/api/bff/products?q=&category=&page=&pageSize=&sort=` | SAP Commerce |
-| GET    | `/api/bff/products/[code]`                             | SAP Commerce |
-| GET    | `/api/bff/content/[slug]`                              | Contentful   |
-| POST   | `/api/webhooks/contentful`                             | Contentful   |
-| POST   | `/api/webhooks/sap-commerce`                           | SAP Commerce |
+| Method | Path | Source |
+| --- | --- | --- |
+| GET  | `/health` | — |
+| GET  | `/bff/homepage` | Contentful |
+| GET  | `/bff/content/:slug` | Contentful |
+| GET  | `/bff/products?q=&category=&page=&pageSize=&sort=` | SAP Commerce |
+| GET  | `/bff/products/:code` | SAP Commerce |
+| POST | `/webhooks/contentful` | Contentful (signed) |
+| POST | `/webhooks/sap-commerce` | SAP Commerce (signed) |
 
-## Caching & invalidation
+All read endpoints return `Cache-Control: public, s-maxage=300, stale-while-revalidate=600` so Vercel's edge cache (or any CDN) holds responses between invocations. Webhook handlers invalidate via `cacheTags.*` + `purgeTag()`.
 
-Every upstream fetch is tagged using `cacheTags.*` and has a TTL. To invalidate from a webhook:
+## Deployment (Vercel, two projects)
 
-```ts
-import { revalidateTag } from "next/cache";
-import { cacheTags } from "@/server/cache/tags";
+| Vercel project | Root directory | Framework |
+| --- | --- | --- |
+| `omega-next-frontend` | `frontend/` | Next.js (auto-detected) |
+| `omega-next-backend`  | `backend/`  | Other (custom) — uses `api/[[...route]].ts` |
 
-revalidateTag(cacheTags.product("apparel-100"));
-```
+The backend is deployed as a serverless function: Vercel uses `backend/api/[[...route]].ts` as the entry, which wraps the Hono `app` via `hono/vercel`. The local `server.ts` (the Node listener) is ignored by Vercel.
 
-Webhook secrets — set `CONTENTFUL_WEBHOOK_SECRET` and `SAP_COMMERCE_WEBHOOK_SECRET` and configure the upstream system to send `x-webhook-secret`.
+GitHub Actions (`.github/workflows/ci.yml`) runs `verify` (lint + typecheck + build) for both apps on every PR, and on push to `main` runs the `deploy` matrix job which uses the Vercel CLI to ship each app to Production. Required repo secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_FRONTEND_PROJECT_ID`, `VERCEL_BACKEND_PROJECT_ID`.
 
-## Calling the BFF
+### Custom domains
 
-```tsx
-// Server component — uses bff-client over HTTP for a uniform contract.
-import { bff } from "@/lib/bff-client";
+- Production frontend: `omega.com`
+- Production backend: `api.omega.com`
 
-export default async function PDP({
-  params,
-}: {
-  params: Promise<{ code: string }>;
-}) {
-  const { code } = await params;
-  const product = await bff.getProduct(code);
-  return <pre>{JSON.stringify(product, null, 2)}</pre>;
-}
-```
+After domains are mapped in Vercel, set `ALLOWED_ORIGINS=https://omega.com` on the backend Production env so CORS only accepts the storefront origin.
 
-For server components in the same Next.js process you may also call domain services directly (e.g. `import { getProductByCode } from "@/server/domains/product/product.service"`) and skip the HTTP hop. Use the BFF client when you want a single uniform contract everywhere (microfrontends, mobile apps, server-component fetches with consistent caching headers).
+### Webhook URLs
+
+After the first prod deploy, repoint:
+
+- Contentful → `https://api.omega.com/webhooks/contentful`
+- SAP Commerce → `https://api.omega.com/webhooks/sap-commerce`
+
+Both must send `x-webhook-secret: <CONTENTFUL_WEBHOOK_SECRET / SAP_COMMERCE_WEBHOOK_SECRET>` (constant-time compared in `backend/src/lib/webhook.ts`).
+
+## Adding a new BFF endpoint
+
+1. Define the response type in `types/<domain>/index.ts`.
+2. Pick the vendor folder (e.g. `backend/src/commerce-sap/` for SAP-sourced).
+3. Add a Zod schema in `<vendor>/schemas/<name>.ts`.
+4. Add the service in `<vendor>/apis/<name>.ts` (calls the adapter, maps via `<vendor>/mappers/<name>.ts`).
+5. Add the Hono route in `<vendor>/routes/<name>.ts` using `withBff()` — three lines.
+6. Mount the route in `backend/src/app.ts`.
+7. Add a method on the frontend BFF client in `frontend/src/lib/api/bff/<name>.ts` and re-export from `index.ts`.
+
+## Adding a new third-party integration
+
+Copy a vendor folder (`backend/src/commerce-sap/` or `content-contentful/`) and rename. The internal shape (`routes/ apis/ mappers/ schemas/ interfaces/ errors/ utils/`) is the same for every vendor — no folder-layout decisions needed.
 
 ## Scripts
 
-- `npm run dev` — local dev (Turbopack)
-- `npm run build` — production build
-- `npm run start` — run production build
-- `npm run lint` — ESLint
+Each app has the same script names:
+
+| Script | What it does |
+| --- | --- |
+| `npm run dev`        | local dev server (Next.js / Hono via tsx watch) |
+| `npm run build`      | production build |
+| `npm run start`      | run the production build |
+| `npm run lint`       | ESLint |
+| `npm run typecheck`  | `tsc --noEmit` |
+| `npm run format`     | Prettier write |
+| `npm run format:check` | Prettier check |
+
+## Caching & invalidation
+
+In-memory `CacheStore` (`backend/src/cache/store.ts`) holds upstream responses by key with a tag index. Webhook handlers call `purgeTag(cacheTags.product(code))` — the store removes every entry with that tag. The in-memory store does NOT survive across Vercel serverless invocations; the edge `Cache-Control` headers are the primary cross-invocation cache. Promote `CacheStore` to Upstash Redis when hit-rate matters.
