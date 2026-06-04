@@ -6,6 +6,7 @@ import type {
   HeaderLocaleOption,
 } from "@shared/types/header";
 import { HeaderDropdown } from "@/components/organisms/Header/HeaderDropdown";
+import { SearchAutocomplete } from "@/components/molecules/SearchAutocomplete";
 
 const DEFAULT_UTILITY_LINKS: HeaderLink[] = [
   { label: "Contact Us", href: "/contact-us" },
@@ -93,7 +94,7 @@ function MainBar({ data, cartCount }: { data: HeaderData; cartCount: number }) {
           )}
         </Link>
 
-        <SearchForm
+        <SearchAutocomplete
           placeholder={data.searchPlaceholder}
           action={data.searchAction}
         />
@@ -275,38 +276,6 @@ function AllProductsStaticButton({
   );
 }
 
-function SearchForm({
-  placeholder,
-  action,
-}: {
-  placeholder: string;
-  action: string;
-}) {
-  return (
-    <form
-      action={action}
-      method="GET"
-      role="search"
-      className="flex max-w-xl flex-1 items-stretch overflow-hidden rounded-md border border-zinc-300 bg-white focus-within:border-[#1F2D63]"
-    >
-      <input
-        type="search"
-        name="q"
-        placeholder={placeholder}
-        aria-label={placeholder}
-        className="min-w-0 flex-1 bg-transparent px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-500 focus:outline-none"
-      />
-      <button
-        type="submit"
-        aria-label="Search"
-        className="flex items-center justify-center px-4 text-[#1F2D63] hover:text-[#16224d]"
-      >
-        <SearchIcon className="h-5 w-5" />
-      </button>
-    </form>
-  );
-}
-
 function NavLinkOrButton({
   link,
   className,
@@ -342,25 +311,6 @@ function NavLinkOrButton({
     >
       {link.label}
     </button>
-  );
-}
-
-function SearchIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      fill="none"
-      aria-hidden="true"
-      className={className}
-    >
-      <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="m17 17-3.5-3.5"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
   );
 }
 

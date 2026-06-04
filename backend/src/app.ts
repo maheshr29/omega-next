@@ -8,6 +8,7 @@ import { bffCacheControl } from "@/middlewares/cache-control";
 import { productsRoutes } from "@Commerce-sap/routes/products";
 import { contentRoutes } from "@Content-contentful/routes/content";
 import { homepageRoutes } from "@Content-contentful/routes/homepage";
+import { suggestRoutes } from "@Search-bloomreach/routes/suggest";
 import { contentfulWebhook } from "@/webhooks/contentful";
 import { sapCommerceWebhook } from "@/webhooks/sap-commerce";
 
@@ -42,6 +43,7 @@ app.use("/bff/*", bffCacheControl);
 app.route("/bff", productsRoutes);
 app.route("/bff", contentRoutes);
 app.route("/bff", homepageRoutes);
+app.route("/bff", suggestRoutes);
 
 // Upstream webhook receivers (mounted under /webhooks).
 app.route("/webhooks", contentfulWebhook);

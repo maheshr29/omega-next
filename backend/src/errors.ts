@@ -33,7 +33,7 @@ export class NotFoundError extends BffError {
 
 export class UpstreamError extends BffError {
   constructor(
-    upstream: "contentful" | "sap-commerce" | "algolia",
+    upstream: "contentful" | "sap-commerce" | "algolia" | "bloomreach",
     status: number,
     message: string,
     cause?: unknown,

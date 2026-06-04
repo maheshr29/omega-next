@@ -1,6 +1,7 @@
 import { contentApi } from "./content";
 import { homepageApi } from "./homepage";
 import { productsApi } from "./products";
+import { searchApi } from "./search";
 
 /**
  * Aggregated BFF client, namespaced by resource. Prefer the resource-specific
@@ -15,7 +16,8 @@ export const bff = {
   products: productsApi,
   content: contentApi,
   homepage: homepageApi,
+  search: searchApi,
 } as const;
 
 export { BffClientError } from "./http";
-export { contentApi, homepageApi, productsApi };
+export { contentApi, homepageApi, productsApi, searchApi };

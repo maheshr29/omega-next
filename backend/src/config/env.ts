@@ -43,6 +43,13 @@ const envSchema = z.object({
   SAP_COMMERCE_CLIENT_ID: z.string().min(1),
   SAP_COMMERCE_CLIENT_SECRET: z.string().min(1),
 
+  // --- Bloomreach (search + suggest) ---
+  BLOOMREACH_SUGGEST_URL: z.url(),
+  BLOOMREACH_ACCOUNT_ID: z.string().min(1),
+  BLOOMREACH_AUTH_KEY: z.string().min(1),
+  BLOOMREACH_CATALOG_VIEWS: z.string().min(1),
+  BLOOMREACH_DEFAULT_DOMAIN: z.string().optional(),
+
   // --- BFF cache TTLs ---
   BFF_PRODUCT_REVALIDATE_SECONDS: z
     .string()

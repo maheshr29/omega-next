@@ -20,7 +20,8 @@
       "@Types/*": ["../types/*"],
       "@Commerce-sap/*": ["src/commerce-sap/*"],
       "@Content-contentful/*": ["src/content-contentful/*"],
-      "@Search-algolia/*": ["src/search-algolia/*"]
+      "@Search-algolia/*": ["src/search-algolia/*"],
+      "@Search-bloomreach/*": ["src/search-bloomreach/*"]
     }
   },
   "include": ["src/**/*.ts", "api/**/*.ts"],
