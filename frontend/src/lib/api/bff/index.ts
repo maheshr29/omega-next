@@ -1,5 +1,6 @@
 import { contentApi } from "./content";
 import { homepageApi } from "./homepage";
+import { categoryPLPAPI } from "./plp";
 import { productsApi } from "./products";
 
 /**
@@ -15,7 +16,8 @@ export const bff = {
   products: productsApi,
   content: contentApi,
   homepage: homepageApi,
+  categories: categoryPLPAPI,
 } as const;
 
 export { BffClientError } from "./http";
-export { contentApi, homepageApi, productsApi };
+export { contentApi, homepageApi, productsApi, categoryPLPAPI };
