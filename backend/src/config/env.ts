@@ -49,6 +49,18 @@ const envSchema = z.object({
   BLOOMREACH_AUTH_KEY: z.string().min(1),
   BLOOMREACH_CATALOG_VIEWS: z.string().min(1),
   BLOOMREACH_DEFAULT_DOMAIN: z.string().optional(),
+  BLOOMREACH_CORE_URL: z
+    .url()
+    .optional()
+    .default("http://staging-core.dxpapi.com/api/v1/core/"),
+  BLOOMREACH_CATEGORY_CATALOG: z
+    .string()
+    .optional()
+    .default("category_en_dwyer"),
+  BLOOMREACH_CATEGORY_FL: z
+    .string()
+    .optional()
+    .default("item_id,name,url,image,parentCategory,description,order"),
 
   // --- BFF cache TTLs ---
   BFF_PRODUCT_REVALIDATE_SECONDS: z

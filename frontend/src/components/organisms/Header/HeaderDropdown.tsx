@@ -186,16 +186,23 @@ function ActiveCategoryHeader({
 }) {
   const className =
     "inline-block border-b-2 border-[#1F2D63] pb-1 text-lg font-medium text-zinc-900";
-  if (item.href) {
-    return (
-      <DropdownLink
-        item={item}
-        onNavigate={onNavigate}
-        className={`${className} hover:text-[#1F2D63]`}
-      />
-    );
-  }
-  return <span className={className}>{item.label}</span>;
+  const href = item.href ?? `/${slugify(item.label)}`;
+  return (
+    <DropdownLink
+      item={{ ...item, href }}
+      onNavigate={onNavigate}
+      className={`${className} hover:text-[#1F2D63]`}
+    />
+  );
+}
+
+function slugify(label: string): string {
+  return label
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function ChevronRight({ className }: { className?: string }) {

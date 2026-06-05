@@ -44,3 +44,27 @@ export type BloomreachSuggestResponse = {
   queryContext: { originalQuery: string };
   suggestionGroups: BloomreachSuggestionGroup[];
 };
+
+/**
+ * Raw Bloomreach core `search` response. Pass-through shape — frontend code
+ * reads `response.docs` directly.
+ */
+export type BloomreachCategoryDoc = {
+  item_id?: string;
+  name?: string;
+  url?: string;
+  image?: string;
+  parentCategory?: string | string[];
+  description?: string;
+  order?: number;
+  [k: string]: unknown;
+};
+
+export type BloomreachCategoryContentResponse = {
+  response: {
+    numFound: number;
+    start: number;
+    docs: BloomreachCategoryDoc[];
+  };
+  [k: string]: unknown;
+};

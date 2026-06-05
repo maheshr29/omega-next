@@ -54,3 +54,31 @@ export type SuggestParams = {
   ref_url?: string;
   _br_uid_2?: string;
 };
+
+/**
+ * Pass-through shape from Bloomreach core search for category content.
+ */
+export type CategoryDoc = {
+  item_id?: string;
+  name?: string;
+  url?: string;
+  image?: string;
+  parentCategory?: string | string[];
+  description?: string;
+  order?: number;
+};
+
+export type CategoryContentResponse = {
+  response: {
+    numFound: number;
+    start: number;
+    docs: CategoryDoc[];
+  };
+};
+
+export type CategoryContentParams = {
+  q: string;
+  start?: number;
+  rows?: number;
+  sort?: string;
+};

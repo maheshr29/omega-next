@@ -9,6 +9,7 @@ import { productsRoutes } from "@Commerce-sap/routes/products";
 import { contentRoutes } from "@Content-contentful/routes/content";
 import { homepageRoutes } from "@Content-contentful/routes/homepage";
 import { suggestRoutes } from "@Search-bloomreach/routes/suggest";
+import { categoryContentRoutes } from "@Search-bloomreach/routes/category-content";
 import { contentfulWebhook } from "@/webhooks/contentful";
 import { sapCommerceWebhook } from "@/webhooks/sap-commerce";
 
@@ -44,6 +45,7 @@ app.route("/bff", productsRoutes);
 app.route("/bff", contentRoutes);
 app.route("/bff", homepageRoutes);
 app.route("/bff", suggestRoutes);
+app.route("/bff", categoryContentRoutes);
 
 // Upstream webhook receivers (mounted under /webhooks).
 app.route("/webhooks", contentfulWebhook);
